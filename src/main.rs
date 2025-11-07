@@ -24,19 +24,23 @@ struct Chunk {
     data: [[i8;32];32],
 }
 
+struct Vector2{
+    x: u8,
+    y: u8,
+}
 enum MoveDir{
     Left,
     Right,
 }
 fn main() {
 
-
+    let mut player_pos: Vector2 = Vector2{x:15,y:0};
 
     let mut rng = rand::rng();
     let seed: u64 = rng.random_range(u64::MIN..=u64::MAX);
 
     let mut srng = StdRng::seed_from_u64(seed);
-    const TOTAL_LOOPS: i32 = 100000;
+    const TOTAL_LOOPS: i32 = 1000000;
     let mut _loops: i32 = 0;
 
     let _generated_chunks_postve: Vec<Chunk> = Vec::new();
@@ -53,11 +57,12 @@ fn main() {
         if _loops >= TOTAL_LOOPS{
             break;
         }
+        print!("{esc}c", esc = 27 as char);
         let _frame_start = Instant::now();
         println!("Frame start: {:?}", _frame_start);
 
         chunk_to_draw = generate_chunk(&mut srng ,seed, chunk_to_draw, MoveDir::Left);
-
+        player_logic(&mut chunk_to_draw, &mut player_pos);
         draw_chunk(&chunk_to_draw);
 
         let _frame_time= Instant::now() - _frame_start;
@@ -70,7 +75,7 @@ fn main() {
         _loops += 1;
         first_generation = false;
         println!("Generation: {}", first_generation);
-        print!("{esc}c", esc = 27 as char);
+
 
         // print!("Generated seed: {}", seed);
         // stdout().flush().unwrap();
@@ -165,8 +170,11 @@ fn draw_chunk(chunk: &Chunk) {
             if *elem == 0 {
                 output[e].push(' ');
             }
-            else{
+            else if *elem == 1{
                 output[e].push('▪');
+            }
+            else if *elem == 2{
+                output[e].push('¡');
             }
         }
     }
@@ -178,4 +186,31 @@ fn draw_chunk(chunk: &Chunk) {
     for i in output.iter() {
         print!("{}", i);
     }
+}
+
+fn player_logic(chunk: &mut Chunk, player_pos:&mut Vector2) {
+    loop{
+        if player_pos.y > 0 {
+            if chunk.data[player_pos.x as usize][(player_pos.y) as usize] != 0{
+                player_pos.y -= 1;
+            }
+            else{
+                break;
+            }
+        }
+        else{
+            break;
+        }
+    }
+    loop {
+        if chunk.data[player_pos.x as usize][(player_pos.y + 1) as usize] != 1 {
+            player_pos.y += 1;
+        }
+        else{
+            break;
+        }
+    }
+
+    chunk.data[player_pos.x as usize][player_pos.y as usize] = 2;
+
 }
