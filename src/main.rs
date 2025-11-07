@@ -67,8 +67,8 @@ fn main() {
 
         let _frame_time= Instant::now() - _frame_start;
         println!("Frame time: {:?}", _frame_time);
-        if _frame_time < Duration::from_millis(4) {
-            let _sleep_time = Duration::from_millis(4) - _frame_time;
+        if _frame_time < Duration::from_millis(1000) {
+            let _sleep_time = Duration::from_millis(1000) - _frame_time;
             thread::sleep(_sleep_time);
             println!("Sleep for: {:?}", _sleep_time);
         }
@@ -98,15 +98,17 @@ fn generate_chunk(srng: &mut StdRng, seed: u64, current_chunk: Chunk, move_dir: 
 
     if matches!(move_dir,MoveDir::Left) {
         for (i, elem) in current_chunk.data[0].iter().enumerate() {
-            if *elem != 0 {
+            if *elem != 0 && *elem != 2{
                 start_height = i as i8;
+                break;
             }
         }
     }
     else{
         for (i, elem) in current_chunk.data[new_chunk.data.len() - 1].iter().enumerate() {
-            if *elem != 0 {
+            if *elem != 0 && *elem != 2{
                 start_height = i as i8;
+                break;
             }
         }
     }
@@ -145,6 +147,10 @@ fn generate_chunk(srng: &mut StdRng, seed: u64, current_chunk: Chunk, move_dir: 
                 *e = 1;
             }
         }
+    }
+
+    for col in new_chunk.data.iter_mut() {
+        col[0] = 0;
     }
 
 
